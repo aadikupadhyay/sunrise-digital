@@ -1,0 +1,40 @@
+
+/* This file is now mostly handled by Tailwind CSS and the index.css file */
+
+/* Additional non-Tailwind styles can be added here if needed */
+
+/* Fix for any legacy styles needed for compatibility */
+
+.prose img {
+  margin: 2rem auto;
+  border-radius: 0.5rem;
+}
+
+.prose h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.prose p {
+  margin-bottom: 1rem;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.main-content {
+  margin-top: 4rem; /* For fixed navbar */
+}
+
+.search-highlight {
+  background-color: rgba(245, 135, 0, 0.2);
+  padding: 0 0.2rem;
+}

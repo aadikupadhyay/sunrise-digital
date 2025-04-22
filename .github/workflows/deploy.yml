@@ -1,0 +1,62 @@
+# .github/workflows/deploy.yml
+
+name: Deploy React App to S3
+
+# Controls when the action will run.
+# Triggers the workflow on push events but only for the main branch.
+on:
+  push:
+    branches: [ main ] # Or 'master', or your default deployment branch
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "deploy"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4 # Use the latest version
+
+      # Sets up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Specify your project's Node.js version
+          cache: 'npm' # Or 'yarn' if you use Yarn
+
+      # Installs dependencies
+      - name: Install dependencies
+        run: npm ci # 'npm ci' is generally recommended for CI for faster, reliable installs
+        # Or use: yarn install --frozen-lockfile
+
+      # Builds the React application
+      - name: Build React App
+        run: npm run build # Or your specific build script (e.g., 'yarn build')
+        env:
+          # You can add build-time environment variables here if needed
+          # Example: REACT_APP_API_URL: ${{ secrets.API_URL }}
+          CI: false # Sometimes needed if warnings are treated as errors
+
+      # Configure AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4 # Use the latest version
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Deploys static site to S3 bucket
+      - name: Deploy static site to S3 bucket
+        run: aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        # Replace './build/' with your actual build output folder if different (e.g., './dist/')
+        # The --delete flag removes files in S3 that are not present in the build output
+
+      # Optional: Invalidate CloudFront Cache
+      # Uncomment the following lines if you are using CloudFront
+      # - name: Invalidate CloudFront Cache
+      #   run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      #   if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }} # Only run if the secret is set
